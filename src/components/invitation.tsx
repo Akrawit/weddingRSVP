@@ -17,14 +17,13 @@ function Flower() {
 export function Invitation({ guest: initialGuest, token, demo = false, initialLanguage = 'th' }: { guest: Guest; token?: string; demo?: boolean; initialLanguage?: Language }) {
   const [lang, setLang] = useState<Language>(initialLanguage);
   const [guest, setGuest] = useState(initialGuest);
-  const [modal, setModal] = useState<'rsvp' | 'share' | null>(null);
+  const [modal, setModal] = useState<'rsvp' | null>(null);
   const [sent, setSent] = useState(false);
   const [status, setStatus] = useState<'accepted' | 'declined'>(initialGuest.rsvp_status === 'declined' ? 'declined' : 'accepted');
   const [seats, setSeats] = useState(initialGuest.seats_confirmed || 1);
   const [dietary, setDietary] = useState(initialGuest.dietary_requirement);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
-  const [shareMessage, setShareMessage] = useState('');
   const [day, setDay] = useState<'today' | 'tomorrow' | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const c = copy[lang];
@@ -86,16 +85,6 @@ export function Invitation({ guest: initialGuest, token, demo = false, initialLa
     finally { setSaving(false); }
   }
 
-  async function share() {
-    const url = location.href.split('#')[0];
-    try {
-      if (navigator.share) await navigator.share({ title: c.shareTitle, url });
-      else { await navigator.clipboard.writeText(url); setShareMessage(c.copied); }
-    } catch (e) {
-      if (!(e instanceof DOMException && e.name === 'AbortError')) setShareMessage(c.copyLink);
-    }
-  }
-
   return <div className={`invitation ${lang === 'th' ? 'thai' : ''}`} lang={lang}>
     <a className="skip-link" href="#details">{c.skip}</a>
     <header className="site-header">
@@ -150,12 +139,10 @@ export function Invitation({ guest: initialGuest, token, demo = false, initialLa
 
       <section id="moments" className="section gallery-section"><div className="gallery-layout">{wedding.gallery.map((photo, i) => <figure key={photo.src} className={`gallery-photo gallery-photo-${i + 1}`}><div><Image src={photo.src} alt={photo.alt[lang]} fill sizes="(max-width: 700px) 80vw, 40vw" /></div><figcaption><span>0{i + 2}</span><span>{i === 1 ? c.photoLabel : couple.toUpperCase() + ' · ' + numericDate[2]}</span></figcaption></figure>)}</div></section>
 
-      <section className="gift-section"><span className="tiny-star" aria-hidden="true">✳</span><h2>{c.giftTitle}<br /><em>{c.giftItalic}</em></h2><p>{c.giftCopy}</p></section>
-
       <section className="reply-section" id="reply"><p className="eyebrow">{c.dear} {guest.display_name}</p><h2>{guest.rsvp_status === 'waiting' ? c.replyTitle : guest.rsvp_status === 'accepted' ? c.success : c.declineTitle}</h2><p>{guest.rsvp_status === 'waiting' ? c.replyCopy : guest.rsvp_status === 'accepted' ? c.successCopy : c.declineCopy}</p><button className="button" onClick={openRsvp}>{guest.rsvp_status === 'waiting' ? c.rsvp : c.edit}<Arrow /></button><p className="reply-deadline">{c.replyBy} {wedding.rsvpBy[lang]}</p><span className="reserved"><span aria-hidden="true">♡</span> {c.headcountNote}</span></section>
     </main>
 
-    <footer><div className="footer-top"><span className="eyebrow">{c.withLove}</span><span className="footer-names">{wedding.names[0]} <em>&</em> {wedding.names[1]}</span><span className="footer-date">{numericDate.join(".")}</span></div><div className="footer-bottom"><span>{c.questions} <a href={wedding.contact}>{c.contact} ↗</a></span><span className="footer-center">BANGKOK, WITH LOVE</span><button onClick={() => { setShareMessage(''); setModal('share'); }}>{c.share}<Arrow diagonal /></button></div></footer>
+    <footer><div className="footer-top"><span className="eyebrow">{c.withLove}</span><span className="footer-names">{wedding.names[0]} <em>&</em> {wedding.names[1]}</span><span className="footer-date">{numericDate.join(".")}</span></div></footer>
 
     {!modal && <div className="mobile-rsvp-bar"><span>{guest.rsvp_status === 'waiting' ? c.headcountNote : c.replySaved}</span><button className="button" onClick={openRsvp}>{guest.rsvp_status === 'waiting' ? c.rsvp : c.edit}<Arrow /></button></div>}
     <dialog ref={dialog} className="invitation-dialog" aria-labelledby="modal-title" onCancel={() => setModal(null)} onClick={e => { if (e.target === dialog.current) setModal(null); }}>
@@ -163,7 +150,6 @@ export function Invitation({ guest: initialGuest, token, demo = false, initialLa
         {modal === 'rsvp' && (sent ? <div className="success-state"><span className="success-mark">{status === 'accepted' ? '✓' : '♡'}</span><p className="eyebrow" id="modal-title">{status === 'accepted' ? c.success : c.declineTitle}</p><h2>{lang === 'en' ? 'Thanks for replying!' : 'ขอบคุณที่ตอบกลับนะคะ'}</h2><p>{status === 'accepted' ? c.successCopy : c.declineCopy}</p>{status === 'accepted' && <a className="text-link" href="/calendar">{c.calendar} ＋</a>}<button className="button" onClick={() => setModal(null)}>{c.done}<Arrow /></button>{demo && <p className="demo-note">{c.demo}</p>}</div> : <form onSubmit={submit}><p className="eyebrow">{c.dear} {guest.display_name}</p><h2 id="modal-title">{c.replyTitle}</h2><p className="dialog-subtitle">{c.rsvpSubtitle}</p><fieldset className="attendance"><legend className="sr-only">{c.rsvp}</legend><label className={status === 'accepted' ? 'selected' : ''}><input type="radio" name="attendance" value="accepted" checked={status === 'accepted'} onChange={() => setStatus('accepted')} /><span>{c.accept}</span><span aria-hidden="true">♡</span></label><label className={status === 'declined' ? 'selected' : ''}><input type="radio" name="attendance" value="declined" checked={status === 'declined'} onChange={() => setStatus('declined')} /><span>{c.decline}</span><span aria-hidden="true">—</span></label></fieldset>
           {status === 'accepted' && <div className="rsvp-fields"><div className="seat-field"><div><label htmlFor="seats">{c.attending}</label><p>{c.headcountNote}</p></div><input id="seats" type="number" inputMode="numeric" min={1} max={2147483647} required value={seats} onChange={e => setSeats(Number(e.target.value))} /></div><label className="field">{c.dietary} <span>({c.optional})</span><textarea value={dietary} onChange={e => setDietary(e.target.value)} maxLength={500} placeholder={c.dietaryPlaceholder} rows={3} /></label></div>}
           {error && <p className="form-error" role="alert">{c.error}</p>}<button type="submit" className="button submit-button" disabled={saving}>{saving ? c.saving : c.submit}<Arrow /></button>{demo && <p className="demo-note">{c.demo}</p>}</form>)}
-        {modal === 'share' && <div className="share-dialog"><p className="eyebrow">{couple.toUpperCase()}</p><h2 id="modal-title">{c.share}</h2><p>{c.shareNote}</p><button className="button" onClick={share}>{c.share}<Arrow diagonal /></button><p role="status">{shareMessage}</p>{shareMessage === c.copyLink && <input aria-label={c.invitationUrl} readOnly value={typeof window !== 'undefined' ? window.location.href.split('#')[0] : ''} onFocus={e => e.currentTarget.select()} />}</div>}
       </div>
     </dialog>
   </div>;
