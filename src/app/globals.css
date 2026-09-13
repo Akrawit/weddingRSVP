@@ -18,3 +18,28 @@ h1,.monogram,.footer-names,.photo-script,.dialog-monogram,.dress-corner{font-lan
 .preview-notice{display:flex;justify-content:center;gap:18px;padding:10px 5%;background:#eeeee4;color:#71775f;font-size:10px;line-height:1.6;border-bottom:1px solid var(--line)}.preview-notice a{text-decoration:underline;white-space:nowrap}.hero-rsvp{margin-top:24px;width:260px;max-width:100%}.hero-rsvp .button{width:100%;min-height:52px}.hero-rsvp p{font-size:11px;color:#63714f;margin-top:12px}.hero-rsvp>span{font-size:9px;color:var(--muted);display:block;margin-top:6px}.hero-copy{padding-top:30px;padding-bottom:22px}.personal-note{margin-bottom:25px}.hero h1{font-size:clamp(76px,6.8vw,105px)}.hero-invite{margin-top:24px}.scroll-cue{margin-top:20px}.mobile-rsvp-bar{display:none}
 @media(max-width:700px){.invitation{padding-bottom:86px}.preview-notice{font-size:9px;padding:8px 6%;align-items:center;gap:12px}.hero-copy{min-height:630px;padding:30px 20px 24px}.hero h1{font-size:76px}.hero .personal-note{margin-bottom:23px}.hero .hero-invite{margin-top:24px}.hero-rsvp{margin-top:23px;width:250px}.hero-rsvp p{font-size:10px;margin-top:10px}.hero-rsvp>span{font-size:8px}.hero .scroll-cue{margin-top:19px}.mobile-rsvp-bar{position:fixed;bottom:0;left:0;right:0;z-index:20;display:flex;gap:12px;justify-content:space-between;align-items:center;background:var(--paper);padding:13px 6% calc(13px + env(safe-area-inset-bottom));border-top:1px solid var(--line);box-shadow:0 -6px 20px #34382e05}.mobile-rsvp-bar>span{font-size:9px;color:#747e64;max-width:110px;line-height:1.7}.mobile-rsvp-bar .button{font-size:11px;min-height:47px;gap:20px;padding:13px 16px}.thai .hero-copy{min-height:660px}.thai .mobile-rsvp-bar .button{font-size:11px}.thai .hero .hero-invite{font-size:10px}.thai .hero-rsvp>span{font-size:9px}.thai .hero-rsvp p{font-size:10px}}
 
+/* Keep invitation details and RSVP controls readable for older guests. */
+body{font-size:16px}
+.eyebrow,.detail-row .eyebrow,.dress-name,.reply-section>.eyebrow{font-size:12px;letter-spacing:1.2px}
+.body-copy,.dress-section .body-copy{font-size:17px;line-height:1.8}
+.muted,.detail-row .muted,.timeline p,.gallery-heading>p,.gift-section>p,.reply-section>p:not(.eyebrow){font-size:16px;line-height:1.75}
+.button,.text-link,.site-header nav,.language-switch{font-size:16px}
+.personal-note>p:last-child,.hero-invite,.thai .hero-invite{font-size:16px;line-height:1.7}
+.personal-note .eyebrow,.header-note,.hero-city,.scroll-cue,.photo-overlay,.detail-number,.timeline-index,.gallery-photo figcaption,.dialog-content .eyebrow{font-size:12px;letter-spacing:1px}
+.date-strip>span:not(.date-strip-main),.date-strip-main em,.timeline-time,.swatches>div,.dress-foot{font-size:14px}
+.hero-rsvp p,.hero-rsvp>span,.reserved,.reply-section .reply-deadline,.footer-bottom,.footer-bottom button{font-size:14px!important;line-height:1.6}
+.preview-notice,.dialog-subtitle,.attendance label,.seat-field label,.field,.field textarea{font-size:16px}
+.seat-field p,.field>span,.field textarea::placeholder,.demo-note,.form-error{font-size:14px!important}
+@media(max-width:700px){
+  .preview-notice{font-size:13px;flex-wrap:wrap}
+  .hero .personal-note>p:last-child,.hero .hero-invite,.thai .hero .hero-invite{font-size:16px}
+  .hero-rsvp{width:min(100%,290px)}
+  .hero-rsvp p,.thai .hero-rsvp p{font-size:15px!important}
+  .hero-rsvp>span,.thai .hero-rsvp>span{font-size:14px!important}
+  .date-strip>span:first-child,.date-strip>span:last-child,.date-strip-main em{font-size:13px}
+  .section-intro .body-copy,.dress-section .body-copy,.detail-row .muted,.timeline p,.gallery-heading>p,.gift-section>p,.reply-section>p:not(.eyebrow){font-size:16px}
+  .timeline-time,.swatches>div,.dress-foot,.reserved,.reply-section .reply-deadline{font-size:14px!important}
+  .mobile-rsvp-bar>span{display:none}
+  .mobile-rsvp-bar .button,.thai .mobile-rsvp-bar .button{width:100%;min-height:52px;font-size:16px;justify-content:center}
+}
+
