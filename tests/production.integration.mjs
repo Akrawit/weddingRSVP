@@ -39,7 +39,7 @@ const mock = createServer(async (req, res) => {
   if (req.method === 'POST') { const rows = body.map(g => ({ ...defaults, ...g, id: randomUUID() })); guests.push(...rows); return send(rows, 201); }
   if (req.method === 'PATCH') {
     const rows = target.map(g => ({ ...g, ...body }));
-    if (rows.some(g => g.seats_confirmed > g.seats_allocated || (!g.plus_one_allowed && g.plus_one_name))) return send({}, 400);
+    if (rows.some(g => g.seats_confirmed < 0 || (g.rsvp_status === 'accepted' ? g.seats_confirmed < 1 : g.seats_confirmed !== 0) || (!g.plus_one_allowed && g.plus_one_name))) return send({}, 400);
     guests = guests.map(g => rows.find(row => row.id === g.id) ?? g); return send(rows);
   }
   if (req.method === 'DELETE') { guests = guests.filter(g => !target.some(row => row.id === g.id)); return send(target); }
@@ -86,7 +86,9 @@ try {
   assert.equal(guestTotals(await list()).confirmedPeople, 2);
   const token = 'b'.repeat(64);
   const reply = (seats, status = 'accepted') => request(`/api/rsvp/${token}`, 'POST', { rsvp_status: status, seats_confirmed: seats, plus_one_name: '', dietary_requirement: 'Vegetarian' });
-  assert.equal((await reply(4)).status, 400);
+  assert.equal((await reply(4)).status, 200);
+  assert.equal(guestTotals(await list()).confirmedPeople, 6);
+  assert.equal((await reply(0)).status, 400);
   assert.equal((await reply(2)).status, 200);
   assert.equal(guestTotals(await list()).confirmedPeople, 4);
   assert.equal((await reply(1)).status, 200);
@@ -115,7 +117,7 @@ try {
   assert.ok(!page.includes('Fixture accepted family'));
   assert.ok(!page.includes('fixture-service-key'));
   assert.equal((await request('/api/admin/session', 'DELETE')).status, 200);
-  console.log('PASS: admin authorization, secure session cookie, party headcounts, RSVP edits, declines, seat limits, CSRF, body limits, atomic CSV validation, pagination, CRUD, export, and guest isolation.');
+  console.log('PASS: admin authorization, secure session cookie, uncapped party headcounts, RSVP edits, declines, CSRF, body limits, atomic CSV validation, pagination, CRUD, export, and guest isolation.');
 } catch (error) { console.error(logs); throw error; }
 finally { child.kill(); mock.closeAllConnections(); await new Promise(resolve => mock.close(resolve)); }
 

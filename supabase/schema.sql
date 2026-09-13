@@ -10,7 +10,7 @@ create table public.wedding_guests (
   display_name text not null check (char_length(btrim(display_name)) between 1 and 150),
   preferred_language text not null default 'en' check (preferred_language in ('en', 'th')),
   seats_allocated integer not null default 1 check (seats_allocated between 1 and 20),
-  seats_confirmed integer not null default 0 check (seats_confirmed >= 0 and seats_confirmed <= seats_allocated),
+  seats_confirmed integer not null default 0 check (seats_confirmed >= 0),
   plus_one_allowed boolean not null default false,
   plus_one_name text not null default '' check (char_length(plus_one_name) <= 120),
   rsvp_status text not null default 'waiting' check (rsvp_status in ('waiting', 'accepted', 'declined')),

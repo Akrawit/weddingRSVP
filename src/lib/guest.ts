@@ -29,7 +29,7 @@ export function validateRsvp(value: unknown, guest: Pick<Guest, 'seats_allocated
   const plusOne = normalizeText(v.plus_one_name, 120, 'name');
   if (!Number.isInteger(v.seats_confirmed)) throw new Error('seats');
   const seats = v.seats_confirmed as number;
-  if (v.rsvp_status === 'accepted' && (seats < 1 || seats > guest.seats_allocated)) throw new Error('seats');
+  if (v.rsvp_status === 'accepted' && (seats < 1 || seats > 2147483647)) throw new Error('seats');
   if (v.rsvp_status === 'declined' && seats !== 0) throw new Error('seats');
   if (!guest.plus_one_allowed && plusOne) throw new Error('plus-one');
   return {

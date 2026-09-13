@@ -9,11 +9,14 @@ test('tokens are 256-bit random values; malformed and sequential tokens are reje
   assert.ok(tokens.every(isToken));
   for (const token of ['1', '12345', '', '../admin', 'x'.repeat(64), 'a'.repeat(63)]) assert.equal(isToken(token), false);
 });
-test('accepts allocated seats and normalizes input', () => {
+test('accepts a positive headcount and normalizes input', () => {
   assert.deepEqual(validateRsvp(valid, demoGuest), { ...valid, plus_one_name: 'Pim', dietary_requirement: 'Vegetarian' });
 });
-test('rejects seats above allocation, zero, fractions, strings and negatives', () => {
-  for (const seats_confirmed of [3, 0, 1.5, '2', -1, NaN]) assert.throws(() => validateRsvp({ ...valid, seats_confirmed }, demoGuest));
+test('accepts headcounts above the old allocation', () => {
+  assert.equal(validateRsvp({ ...valid, seats_confirmed: 30 }, demoGuest).seats_confirmed, 30);
+});
+test('rejects zero, fractions, strings, negatives and counts beyond the database integer range', () => {
+  for (const seats_confirmed of [0, 1.5, '2', -1, NaN, 2147483648]) assert.throws(() => validateRsvp({ ...valid, seats_confirmed }, demoGuest));
 });
 test('decline must confirm zero seats and clears dietary and plus-one information', () => {
   assert.throws(() => validateRsvp({ ...valid, rsvp_status: 'declined' }, demoGuest));

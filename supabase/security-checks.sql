@@ -21,11 +21,10 @@ begin
   if not (select invitation_token ~ '^[a-f0-9]{64}$' from public.wedding_guests where id = test_id) then
     raise exception 'Token format is invalid';
   end if;
-  begin
-    update public.wedding_guests set rsvp_status = 'accepted', seats_confirmed = 3 where id = test_id;
-    raise exception 'Seat limit was not enforced';
-  exception when check_violation then null;
-  end;
+  update public.wedding_guests set rsvp_status = 'accepted', seats_confirmed = 3 where id = test_id;
+  if not (select seats_confirmed = 3 from public.wedding_guests where id = test_id) then
+    raise exception 'Headcount above the legacy allocation was not saved';
+  end if;
   begin
     update public.wedding_guests set rsvp_status = 'declined', seats_confirmed = 1 where id = test_id;
     raise exception 'Decline seat constraint was not enforced';

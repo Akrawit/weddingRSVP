@@ -26,7 +26,7 @@ npm start
 
 - Personalized editorial invitation, responsive from 320px to desktop.
 - English and Thai copy, locally hosted fonts, reduced-motion support.
-- Accept/decline, attendee count, conditional plus-one, dietary needs, reply editing.
+- Accept/decline, guest-entered total headcount, dietary needs, reply editing.
 - Calendar download, map directions, schedule, screenshot-friendly dress palette.
 - Three-photo asymmetric gallery, discreet gift drawer, private sharing flow.
 - Today/tomorrow presentation for accepted guests, using the Asia/Bangkok date.
@@ -35,7 +35,7 @@ npm start
 - SQL schema with RLS, no public guest grants, 256-bit tokens, and database seat constraints.
 - A prominent opening-screen RSVP action and a persistent mobile RSVP button.
 - Protected organizer sign-in and `/admin` headcount view, with minute-by-minute refresh while visible.
-- Confirmed people, allocated seats, accepted/declined/waiting invitations, and pending possible guests.
+- Confirmed people and accepted/declined/waiting invitations.
 - Guest creation/editing/deletion, table assignments, secure invitation links, search and status filters.
 - CSV preview/import, a downloadable template at `/guest-template.csv`, and export including personal links.
 - Automated RSVP, token, count, CSV and date-boundary tests; production HTTP integration tests.
@@ -51,7 +51,7 @@ Gift details are empty by default. Add your verified PromptPay QR path and/or ba
 ## Supabase setup
 
 1. The schema is already applied to the shared Supabase project `xnymyetfdlaaxqzhsggq`. For a separate project, review `supabase/schema.sql` before applying it.
-2. `supabase/security-checks.sql` passed against the shared project. It verifies browser role privileges, RLS, token format, and seat/plus-one constraints, then rolls back its fixture data.
+2. For the existing shared project, apply `supabase/allow-unlimited-headcount.sql` before deploying this version. Then run `supabase/security-checks.sql` to verify browser role privileges, RLS, token format, and headcount/status constraints; it rolls back its fixture data.
 3. Create a confirmed organizer email user in Supabase Authentication. Only this user's UUID is authorized; other signed-in Supabase users are denied. No password is needed to sign in to this app.
 4. Copy `.env.example` to `.env.local` and set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_PUBLISHABLE_KEY` (publishable or legacy anon key), `ADMIN_USER_ID` (organizer UUID), and the exact public `SITE_URL` origin. Never expose the service-role key in a `NEXT_PUBLIC_` variable. Restart the app after configuring it.
 5. In Supabase Authentication → URL Configuration, add the exact `${SITE_URL}/admin/callback` URL to Redirect URLs (for local preview, `http://localhost:3001/admin/callback`). The email template must retain its default `{{ .ConfirmationURL }}` link. Visit `/admin`, enter the organizer email, and open the sign-in link from that inbox. Then add or import invitations and copy each guest's personal `/i/{token}` link to send manually through LINE.
@@ -61,17 +61,17 @@ Live RSVP persistence and organizer magic-link login have been verified against 
 
 Guest routes select only display fields for the matching token. Guest listing, CSV export and every admin mutation require server verification of the organizer's Supabase Auth identity. The admin access token is held in an HttpOnly, SameSite=Strict cookie (Secure over HTTPS), lasting up to one hour; sign in again when it expires. No refresh token is stored. There is no public signup or user-managed admin role.
 
-RSVP writes are constrained to four fields and checked on the server; SQL constraints also enforce allocated seats if allocations change concurrently. Mutating endpoints validate Origin and bound request-body size. Table numbers are rendered prominently only for accepted guests today or tomorrow. Invitation links are bearer credentials: share only with the intended invited party. Open Graph metadata never includes guest names or tokens.
+RSVP writes are constrained to four fields and checked on the server. A guest can enter any positive whole-number headcount within PostgreSQL's integer range; the old allocated-seat limit is retained in historical records but no longer limits replies. Mutating endpoints validate Origin and bound request-body size. Table numbers are rendered prominently only for accepted guests today or tomorrow. Invitation links are bearer credentials: share only with the intended invited party. Open Graph metadata never includes guest names or tokens.
 
 ## Headcount and CSV behavior
 
-The main number is the sum of `seats_confirmed` for accepted invitations. Accepted invitations and invited people are labelled separately: a family of three is one invitation and three confirmed guests. Filters affect the table, not the total. Editing an RSVP updates the same database row. Declining confirms zero attendees. Fetching all pages avoids silently counting only the first API page.
+The main number is the sum of `seats_confirmed` for accepted invitations. A family of three is one invitation and three confirmed guests. Filters affect the table, not the total. Editing an RSVP updates the same database row. Declining confirms zero attendees. Fetching all pages avoids silently counting only the first API page.
 
-CSV columns are `name,seats,language,table`, with optional `plus_one_allowed` (`true`/`false`, defaults to false). Each row creates a new invitation. Review before importing; repeated names are not automatically merged, so import each file once. All rows are validated before one batch insert. Exports include dietary notes and invitation links, and neutralize spreadsheet formula prefixes. Treat exported files as private guest data.
+CSV columns are `name,seats,language,table`, with optional `plus_one_allowed` (`true`/`false`, defaults to false). The legacy `seats` value is retained for compatibility but no longer limits the guest's reply. Each row creates a new invitation. Review before importing; repeated names are not automatically merged, so import each file once. All rows are validated before one batch insert. Exports include dietary notes and invitation links, and neutralize spreadsheet formula prefixes. Treat exported files as private guest data.
 
 ## Verification and remaining setup
 
-`npm test` covers counting, CSV parsing/export safety, validation, tokens and Bangkok dates. After building, `npm run test:integration` launches a temporary production server and an isolated Supabase test double. It checks admin authentication, cookie flags, denied roles, acceptance → edit → decline headcounts, seat limits, request origins, body limits, CSV validation, pagination, CRUD, export, and guest isolation. The test double contains synthetic data and is shut down afterward. These tests do not prove live Supabase RLS; run the supplied SQL security checks against your actual development project.
+`npm test` covers counting, CSV parsing/export safety, validation, tokens and Bangkok dates. After building, `npm run test:integration` launches a temporary production server and an isolated Supabase test double. It checks admin authentication, cookie flags, denied roles, acceptance → edit → decline headcounts, request origins, body limits, CSV validation, pagination, CRUD, export, and guest isolation. The test double contains synthetic data and is shut down afterward. These tests do not prove live Supabase RLS; run the supplied SQL security checks against your actual development project.
 
 Before public launch: confirm the RSVP deadline and contact address, configure the production origin, and test on physical iOS/Android devices inside LINE. Invitation-open tracking remains unimplemented and does not affect RSVP counting. Native share and calendar handling can differ between LINE and the system browser. A clipboard/manual-copy fallback is included for sharing.
 
