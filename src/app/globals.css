@@ -43,3 +43,5 @@ body{font-size:16px}
   .mobile-rsvp-bar .button,.thai .mobile-rsvp-bar .button{width:100%;min-height:52px;font-size:16px;justify-content:center}
 }
 
+
+@media(max-width:700px){.hero-copy,.thai .hero-copy{padding-top:64px}}
