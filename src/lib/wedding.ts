@@ -23,11 +23,11 @@ export const wedding = {
     { time: '19:00', en: 'Wedding ceremony', th: 'พิธีการ', detail: { en: "With both sets of parents, the groom's older sister, and the bride's younger sister.", th: 'ร่วมพิธีกับคุณพ่อคุณแม่ทั้งสองฝ่าย พี่สาวเจ้าบ่าว และน้องสาวเจ้าสาว' } }
   ],
   colors: [
-    { hex: '#d9cbb8', en: 'Sand', th: 'สีทราย' },
-    { hex: '#aab09b', en: 'Sage', th: 'สีเขียวเสจ' },
-    { hex: '#a28670', en: 'Mocha', th: 'สีมอคค่า' },
-    { hex: '#c9a69e', en: 'Dusty rose', th: 'สีชมพูกุหลาบ' },
-    { hex: '#646654', en: 'Olive', th: 'สีเขียวมะกอก' }
+    { hex: '#f4d979', en: 'Soft yellow', th: 'สีเหลืองอ่อน' },
+    { hex: '#f4b99f', en: 'Peach', th: 'สีพีช' },
+    { hex: '#edbdd0', en: 'Light pink', th: 'สีชมพูอ่อน' },
+    { hex: '#afd9e8', en: 'Sky blue', th: 'สีฟ้าอ่อน' },
+    { hex: '#b9dfc4', en: 'Mint', th: 'สีเขียวมิ้นต์' }
   ],
 };
 export function weddingDate(lang: Language, options: Intl.DateTimeFormatOptions) {
