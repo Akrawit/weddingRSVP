@@ -14,8 +14,8 @@ function Flower() {
   return <svg className="flower" viewBox="0 0 100 120" fill="none" stroke="currentColor" strokeWidth=".7" aria-hidden="true"><path d="M48 116c5-27 9-47 6-72M50 89C29 88 22 75 22 66c18 1 27 11 28 23ZM52 77c16-3 23-15 22-23-15 3-20 13-22 23Z" /><path d="M54 45C28 54 23 32 36 27 22 11 43 2 49 20 50-3 72 5 65 24 83 10 96 29 73 37 96 43 81 61 65 47 65 69 42 64 54 45Z" /><circle cx="58" cy="35" r="7" /></svg>;
 }
 
-export function Invitation({ guest: initialGuest, token, demo = false }: { guest: Guest; token?: string; demo?: boolean }) {
-  const [lang, setLang] = useState<Language>('th');
+export function Invitation({ guest: initialGuest, token, demo = false, initialLanguage = 'th' }: { guest: Guest; token?: string; demo?: boolean; initialLanguage?: Language }) {
+  const [lang, setLang] = useState<Language>(initialLanguage);
   const [guest, setGuest] = useState(initialGuest);
   const [modal, setModal] = useState<'rsvp' | 'gift' | 'share' | null>(null);
   const [sent, setSent] = useState(false);

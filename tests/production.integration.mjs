@@ -116,6 +116,9 @@ try {
   assert.ok(page.includes('Fixture waiting family'));
   assert.ok(!page.includes('Fixture accepted family'));
   assert.ok(!page.includes('fixture-service-key'));
+  const englishPage = await (await request('/i/' + token + '?lang=en')).text();
+  assert.ok(englishPage.includes('Confirm attendance'));
+  assert.ok(englishPage.includes('lang="en"'));
   assert.equal((await request('/api/admin/session', 'DELETE')).status, 200);
   console.log('PASS: admin authorization, secure session cookie, uncapped party headcounts, RSVP edits, declines, CSRF, body limits, atomic CSV validation, pagination, CRUD, export, and guest isolation.');
 } catch (error) { console.error(logs); throw error; }

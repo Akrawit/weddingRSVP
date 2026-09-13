@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { guestTotals, parseGuestCsv, type AdminGuest, type GuestInput } from '@/lib/admin';
 import { wedding, weddingDate } from '@/lib/wedding';
-import { invitationMessage } from '@/lib/invitation-message';
+import { invitationMessage, invitationUrl } from '@/lib/invitation-message';
 
 const empty: GuestInput = { display_name: '', seats_allocated: 1, preferred_language: 'th', plus_one_allowed: false, table_number: null };
 export function GuestManager({ initialGuests, setupRequired = false, siteOrigin }: { initialGuests: AdminGuest[]; setupRequired?: boolean; siteOrigin?: string }) {
@@ -68,8 +68,8 @@ export function GuestManager({ initialGuests, setupRequired = false, siteOrigin 
   }
   function edit(guest?: AdminGuest) { setError(''); setDraft(guest ? { display_name: guest.display_name, seats_allocated: guest.seats_allocated, preferred_language: guest.preferred_language, plus_one_allowed: guest.plus_one_allowed, table_number: guest.table_number } : { ...empty }); setEditor(guest ?? 'new'); }
   async function copyInvitation(guest: AdminGuest) {
-    const url = `${siteOrigin || location.origin}/i/${guest.invitation_token}`;
-    const message = invitationMessage(guest.display_name, url);
+    const url = invitationUrl(siteOrigin || location.origin, guest.invitation_token, guest.preferred_language);
+    const message = invitationMessage(guest.display_name, url, guest.preferred_language);
     try { await navigator.clipboard.writeText(message); setNotice(`LINE invitation copied for ${guest.display_name}.`); }
     catch { setNotice(`Copy this LINE invitation: ${message}`); }
   }
