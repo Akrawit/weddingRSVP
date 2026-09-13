@@ -148,7 +148,7 @@ export function Invitation({ guest: initialGuest, token, demo = false, initialLa
 
       <section className="dress-section section" id="dress-code"><h2>{c.dress}</h2><p className="body-copy">{c.dressCopy}</p><div className="swatches">{wedding.colors.map(color => <div key={color.hex}><span className="swatch" style={{ background: color.hex }} /><span>{color[lang]}</span></div>)}</div></section>
 
-      <section id="moments" className="section gallery-section"><div className="gallery-heading"><div><p className="eyebrow">{c.gallery}</p><h2>{c.galleryTitle}</h2></div></div><div className="gallery-layout">{wedding.gallery.map((photo, i) => <figure key={photo.src} className={`gallery-photo gallery-photo-${i + 1}`}><div><Image src={photo.src} alt={photo.alt[lang]} fill sizes="(max-width: 700px) 80vw, 40vw" /></div><figcaption><span>0{i + 2}</span><span>{i === 1 ? c.photoLabel : couple.toUpperCase() + ' · ' + numericDate[2]}</span></figcaption></figure>)}</div></section>
+      <section id="moments" className="section gallery-section"><div className="gallery-layout">{wedding.gallery.map((photo, i) => <figure key={photo.src} className={`gallery-photo gallery-photo-${i + 1}`}><div><Image src={photo.src} alt={photo.alt[lang]} fill sizes="(max-width: 700px) 80vw, 40vw" /></div><figcaption><span>0{i + 2}</span><span>{i === 1 ? c.photoLabel : couple.toUpperCase() + ' · ' + numericDate[2]}</span></figcaption></figure>)}</div></section>
 
       <section className="gift-section"><span className="tiny-star" aria-hidden="true">✳</span><h2>{c.giftTitle}<br /><em>{c.giftItalic}</em></h2><p>{c.giftCopy}</p></section>
 
