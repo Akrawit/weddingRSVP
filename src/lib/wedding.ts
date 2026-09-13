@@ -29,8 +29,6 @@ export const wedding = {
     { hex: '#c9a69e', en: 'Dusty rose', th: 'สีชมพูกุหลาบ' },
     { hex: '#646654', en: 'Olive', th: 'สีเขียวมะกอก' }
   ],
-  // Add a verified QR image in public/images, and real bank details when available.
-  gift: { qr: '', bank: '', accountName: '', accountNumber: '' }
 };
 export function weddingDate(lang: Language, options: Intl.DateTimeFormatOptions) {
   return new Intl.DateTimeFormat(lang === 'th' ? 'th-TH' : 'en-GB', { timeZone: 'Asia/Bangkok', ...options }).format(new Date(wedding.start));
