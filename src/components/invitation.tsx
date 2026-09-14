@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { wedding, weddingDate, type Language } from '@/lib/wedding';
 import { copy } from '@/lib/copy';
 import { weddingDay, validateRsvp, type Guest, type Rsvp } from '@/lib/guest';
+import { EnvelopeIntro } from '@/components/envelope-intro';
 
 function Arrow({ diagonal = false }: { diagonal?: boolean }) {
   return <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><path d={diagonal ? 'M6 18 18 6M6 6h12v12' : 'M4 12h15m-5-5 5 5-5 5'} /></svg>;
@@ -86,6 +87,7 @@ export function Invitation({ guest: initialGuest, token, demo = false, initialLa
   }
 
   return <div className={`invitation ${lang === 'th' ? 'thai' : ''}`} lang={lang}>
+    <EnvelopeIntro name={guest.display_name} language={lang} />
     <a className="skip-link" href="#details">{c.skip}</a>
     <header className="site-header">
       <a className="monogram" href="#home" aria-label={c.backToTop}>{wedding.monogram}</a>

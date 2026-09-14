@@ -47,3 +47,23 @@ body{font-size:16px}
 @media(max-width:700px){.hero-copy,.thai .hero-copy{padding-top:64px}}
 
 .hero .personal-note .eyebrow{font-size:clamp(20px,2.2vw,24px);font-weight:600;letter-spacing:0;line-height:1.45;overflow-wrap:anywhere}
+
+.envelope-intro{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:42px;width:100%;height:100dvh;padding:28px;background:#f7f5ee;color:#595b4d;text-align:center;cursor:pointer;touch-action:none;overscroll-behavior:contain;transition:opacity .38s ease}
+.envelope-intro-leaving{opacity:0;pointer-events:none}
+.envelope-intro-kicker,.envelope-intro-hint{font-size:11px;letter-spacing:2px;line-height:1.5}
+.envelope-intro-hint{letter-spacing:.5px}
+.envelope-art{position:relative;display:block;width:min(84vw,420px);height:min(52vw,260px);min-height:200px;filter:drop-shadow(0 16px 30px #716a5930);perspective:800px}
+.envelope-back,.envelope-front,.envelope-flap{position:absolute;inset:0;display:block}
+.envelope-back{background:#e8dfcc;border:1px solid #d6cbb6}
+.envelope-card{position:absolute;left:7%;right:7%;top:5%;height:83%;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#fffdf8;border:1px solid #eee6d8;transition:transform .75s cubic-bezier(.2,.8,.25,1) .2s}
+.envelope-card>span{font-family:var(--serif);font-size:clamp(26px,5vw,43px);letter-spacing:1px;color:#6d715c}
+.envelope-card i{font-size:.65em;font-weight:400}
+.envelope-card small{font-size:9px;letter-spacing:2px}
+.envelope-front{z-index:3;background:#eee6d6;clip-path:polygon(0 0,50% 52%,100% 0,100% 100%,0 100%);border:1px solid #d6cbb6}
+.envelope-flap{z-index:4;background:#e2d8c6;clip-path:polygon(0 0,100% 0,50% 58%);transform-origin:top center;transition:transform .58s ease}
+.envelope-address{position:absolute;z-index:5;left:9%;right:9%;top:57%;font-size:clamp(18px,3vw,25px);font-weight:600;line-height:1.4;overflow-wrap:anywhere;transition:opacity .3s ease}
+.envelope-intro-opening .envelope-flap,.envelope-intro-leaving .envelope-flap{transform:rotateX(180deg);z-index:0}
+.envelope-intro-opening .envelope-card,.envelope-intro-leaving .envelope-card{transform:translateY(-32%)}
+.envelope-intro-leaving .envelope-address{opacity:0}
+@media(max-width:700px){.envelope-intro{gap:34px}.envelope-art{height:220px}.envelope-intro-kicker,.envelope-intro-hint{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.envelope-intro,.envelope-flap,.envelope-card,.envelope-address{transition:none!important}}
