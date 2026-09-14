@@ -15,9 +15,9 @@ export function EnvelopeIntro({ name, language }: { name: string; language: Lang
       return () => timers.current.forEach(clearTimeout);
     }
     timers.current = [
-      setTimeout(() => setStage('opening'), 350),
-      setTimeout(() => setStage('leaving'), 1450),
-      setTimeout(() => setStage('done'), 1850)
+      setTimeout(() => setStage('opening'), 450),
+      setTimeout(() => setStage('leaving'), 1800),
+      setTimeout(() => setStage('done'), 2250)
     ];
     return () => timers.current.forEach(clearTimeout);
   }, []);

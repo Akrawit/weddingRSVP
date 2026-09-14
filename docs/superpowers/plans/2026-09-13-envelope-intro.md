@@ -15,7 +15,7 @@
 **Files:** Create `src/components/envelope-intro.tsx`; modify `src/components/invitation.tsx`.
 
 - [x] Add `EnvelopeIntro` with `name` and `language` props. Render a full-screen button with the addressee, envelope flap, inner card, and a short skip hint.
-- [x] Start the opening CSS state after 350 ms, fade after 1,450 ms, and unmount after 1,850 ms. Activation unmounts immediately. Reduced-motion preference unmounts immediately.
+- [x] Start the opening CSS state after 450 ms, fade after 1,800 ms, and unmount after 2,250 ms. Activation unmounts immediately. Reduced-motion preference unmounts immediately.
 - [x] Mount it before the main invitation using `guest.display_name` and `lang`.
 
 ### Task 2: Styling and verification
