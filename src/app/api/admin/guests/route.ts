@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { isAdmin } from '@/lib/admin-auth';
-import { createGuests, deleteGuest, listGuests, updateGuest } from '@/lib/admin-guests';
+import { createGuests, deleteGuest, listGuests, updateGuest, updateInvitationSent } from '@/lib/admin-guests';
 import { exportGuestCsv, parseGuestCsv, validateGuest } from '@/lib/admin';
 import { apiError, apiJson, checkOrigin, HttpError, readJson } from '@/lib/http';
 
@@ -29,6 +29,11 @@ export async function PATCH(request: NextRequest) {
     checkOrigin(request); await authorize();
     const input = await readJson(request) as Record<string, unknown>;
     const id = checkedId(input?.id);
+    if ('invitation_sent' in input && Object.keys(input).every(key => key === 'id' || key === 'invitation_sent')) {
+      if (typeof input.invitation_sent !== 'boolean') throw new HttpError('Sent status must be true or false.');
+      await updateInvitationSent(id, input.invitation_sent);
+      return apiJson({ ok: true });
+    }
     let guest;
     try { guest = validateGuest(input); } catch (error) { throw new HttpError((error as Error).message); }
     await updateGuest(id, guest);

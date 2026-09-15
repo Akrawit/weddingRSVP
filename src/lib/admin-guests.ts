@@ -32,6 +32,10 @@ export async function updateGuest(id: string, input: GuestInput) {
   const result = await database(`?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify(input) });
   if (result.length !== 1) throw new HttpError('This invitation no longer exists.', 404);
 }
+export async function updateInvitationSent(id: string, invitationSent: boolean) {
+  const result = await database(`?id=eq.${id}`, { method: 'PATCH', body: JSON.stringify({ invitation_sent: invitationSent }) });
+  if (result.length !== 1) throw new HttpError('This invitation no longer exists.', 404);
+}
 export async function deleteGuest(id: string) {
   const result = await database(`?id=eq.${id}`, { method: 'DELETE' });
   if (result.length !== 1) throw new HttpError('This invitation no longer exists.', 404);

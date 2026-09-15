@@ -12,7 +12,8 @@ export function GuestManager({ initialGuests, setupRequired = false, siteOrigin 
   const router = useRouter();
   const [guests, setGuests] = useState(initialGuests);
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [rsvpFilter, setRsvpFilter] = useState('all');
+  const [sentFilter, setSentFilter] = useState('all');
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
@@ -27,7 +28,7 @@ export function GuestManager({ initialGuests, setupRequired = false, siteOrigin 
   const fileInput = useRef<HTMLInputElement>(null);
   const mutation = useRef(false);
   const totals = guestTotals(guests);
-  const visible = guests.filter(g => (filter === 'all' || g.rsvp_status === filter) && `${g.display_name} ${g.plus_one_name} ${g.table_number ?? ''}`.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
+  const visible = guests.filter(g => (rsvpFilter === 'all' || g.rsvp_status === rsvpFilter) && (sentFilter === 'all' || g.invitation_sent === (sentFilter === 'sent')) && `${g.display_name} ${g.plus_one_name} ${g.table_number ?? ''}`.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
 
   const refresh = useCallback(async () => {
     if (setupRequired) return;
@@ -67,10 +68,28 @@ export function GuestManager({ initialGuests, setupRequired = false, siteOrigin 
     finally { mutation.current = false; setBusy(false); }
   }
   function edit(guest?: AdminGuest) { setError(''); setDraft(guest ? { display_name: guest.display_name, seats_allocated: guest.seats_allocated, preferred_language: guest.preferred_language, plus_one_allowed: guest.plus_one_allowed, table_number: guest.table_number } : { ...empty }); setEditor(guest ?? 'new'); }
+  async function setInvitationSent(guest: AdminGuest, invitationSent: boolean, success: string) {
+    if (mutation.current) return;
+    mutation.current = true; setError(''); setNotice('');
+    setGuests(current => current.map(row => row.id === guest.id ? { ...row, invitation_sent: invitationSent } : row));
+    try {
+      const response = await fetch('/api/admin/guests', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: guest.id, invitation_sent: invitationSent }) });
+      const data = await response.json();
+      if (!response.ok) { if (response.status === 401) router.refresh(); throw new Error(data.error); }
+      setNotice(success);
+    } catch (e) {
+      setGuests(current => current.map(row => row.id === guest.id ? { ...row, invitation_sent: guest.invitation_sent } : row));
+      setError(e instanceof Error ? e.message : 'Could not update the sent status. Please try again.');
+    } finally { mutation.current = false; }
+  }
   async function copyInvitation(guest: AdminGuest) {
     const url = invitationUrl(siteOrigin || location.origin, guest.invitation_token, guest.preferred_language);
     const message = invitationMessage(guest.display_name, url, guest.preferred_language);
-    try { await navigator.clipboard.writeText(message); setNotice(`LINE invitation copied for ${guest.display_name}.`); }
+    try {
+      await navigator.clipboard.writeText(message);
+      if (guest.invitation_sent) setNotice(`LINE invitation copied for ${guest.display_name}.`);
+      else await setInvitationSent(guest, true, `LINE invitation copied and marked sent for ${guest.display_name}.`);
+    }
     catch { setNotice(`Copy this LINE invitation: ${message}`); }
   }
   async function readFile(file?: File) {
@@ -98,9 +117,9 @@ export function GuestManager({ initialGuests, setupRequired = false, siteOrigin 
     {!setupRequired && <progress aria-label="Invitations replied" max={totals.invitations || 1} value={totals.accepted + totals.declined} />}
     {error && !isDialogOpen && <p role="alert" className="admin-error">{error}</p>}{notice && <p role="status" className="admin-notice">{notice}</p>}
     <section className="guest-list"><div className="guest-list-heading"><h2>Guest list</h2><div><button disabled={setupRequired || busy} onClick={() => { setBusy(true); refresh().then(() => setError('')).catch(e => setError(e.message)).finally(() => setBusy(false)); }}>Refresh</button><button disabled={setupRequired} onClick={() => fileInput.current?.click()}>Import CSV</button>{!setupRequired ? <a href="/api/admin/guests?format=csv">Export CSV ↓</a> : <button disabled>Export CSV ↓</button>}</div></div><input type="file" ref={fileInput} accept=".csv,text/csv" className="sr-only" tabIndex={-1} onChange={e => readFile(e.target.files?.[0])} aria-label="Import guest CSV" />
-      <div className="guest-filters"><label><span className="sr-only">Search guests</span><input type="search" placeholder="Search by name or table…" value={query} onChange={e => setQuery(e.target.value)} /></label><label><span className="sr-only">RSVP status</span><select value={filter} onChange={e => setFilter(e.target.value)}><option value="all">All replies</option><option value="accepted">Accepted</option><option value="waiting">Waiting</option><option value="declined">Declined</option></select></label></div>
-      <div className="guest-table-wrap"><table><thead><tr><th>Guest / party</th><th>RSVP</th><th>Attending</th><th>Dietary needs</th><th>Table</th><th>Invitation</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>{visible.map(guest => <tr key={guest.id}><td><strong>{guest.display_name}</strong>{guest.plus_one_name && <small>With {guest.plus_one_name}</small>}<small>{guest.preferred_language === 'th' ? 'Thai' : 'English'}</small></td><td><span className={`rsvp-badge ${guest.rsvp_status}`}>{guest.rsvp_status}</span></td><td className="attendee-cell">{guest.rsvp_status === 'accepted' ? guest.seats_confirmed : '—'}</td><td className="dietary-cell">{guest.dietary_requirement || '—'}</td><td>{guest.table_number || '—'}</td><td><button onClick={() => copyInvitation(guest)}>Copy LINE invite ↗</button></td><td className="row-actions"><button aria-label={`Edit ${guest.display_name}`} onClick={() => edit(guest)}>Edit</button><button aria-label={`Delete ${guest.display_name}`} onClick={() => { setError(''); setDeleting(guest); }}>Delete</button></td></tr>)}</tbody></table></div>
-      {!visible.length && <div className="admin-empty"><span aria-hidden="true">♡</span><h3>{setupRequired ? 'A place for every reply.' : guests.length ? 'No matching invitations.' : 'Start with your guest list.'}</h3><p>{setupRequired ? 'Connect the database to see confirmed guests here.' : guests.length ? 'Try another name or RSVP filter.' : 'Add one invitation per person or family. Each party can confirm its own headcount.'}</p>{!setupRequired && !guests.length && <button className="admin-primary" onClick={() => edit()}>Add your first invitation</button>}</div>}
+      <div className="guest-filters"><label><span className="sr-only">Search guests</span><input type="search" placeholder="Search by name or table…" value={query} onChange={e => setQuery(e.target.value)} /></label><label><span className="sr-only">RSVP status</span><select value={rsvpFilter} onChange={e => setRsvpFilter(e.target.value)}><option value="all">All replies</option><option value="accepted">Accepted</option><option value="waiting">Waiting</option><option value="declined">Declined</option></select></label><label><span className="sr-only">Invitation delivery</span><select value={sentFilter} onChange={e => setSentFilter(e.target.value)}><option value="all">All delivery</option><option value="sent">Sent</option><option value="not-sent">Not sent</option></select></label></div>
+      <div className="guest-table-wrap"><table><thead><tr><th>Guest / party</th><th>RSVP</th><th>Attending</th><th>Dietary needs</th><th>Table</th><th>Invitation</th><th><span className="sr-only">Actions</span></th></tr></thead><tbody>{visible.map(guest => <tr key={guest.id}><td><strong>{guest.display_name}</strong>{guest.plus_one_name && <small>With {guest.plus_one_name}</small>}<small>{guest.preferred_language === 'th' ? 'Thai' : 'English'}</small></td><td><span className={`rsvp-badge ${guest.rsvp_status}`}>{guest.rsvp_status}</span></td><td className="attendee-cell">{guest.rsvp_status === 'accepted' ? guest.seats_confirmed : '—'}</td><td className="dietary-cell">{guest.dietary_requirement || '—'}</td><td>{guest.table_number || '—'}</td><td className="invitation-cell"><span className={`sent-badge ${guest.invitation_sent ? 'sent' : ''}`}>{guest.invitation_sent ? 'Sent' : 'Not sent'}</span><button onClick={() => copyInvitation(guest)}>Copy LINE invite ↗</button>{guest.invitation_sent && <button className="undo-sent" onClick={() => setInvitationSent(guest, false, `${guest.display_name} marked not sent.`)}>Undo sent</button>}</td><td className="row-actions"><button aria-label={`Edit ${guest.display_name}`} onClick={() => edit(guest)}>Edit</button><button aria-label={`Delete ${guest.display_name}`} onClick={() => { setError(''); setDeleting(guest); }}>Delete</button></td></tr>)}</tbody></table></div>
+      {!visible.length && <div className="admin-empty"><span aria-hidden="true">♡</span><h3>{setupRequired ? 'A place for every reply.' : guests.length ? 'No matching invitations.' : 'Start with your guest list.'}</h3><p>{setupRequired ? 'Connect the database to see confirmed guests here.' : guests.length ? 'Try another name or filter.' : 'Add one invitation per person or family. Each party can confirm its own headcount.'}</p>{!setupRequired && !guests.length && <button className="admin-primary" onClick={() => edit()}>Add your first invitation</button>}</div>}
       {!setupRequired && <div className="guest-list-footer"><span>{visible.length} of {guests.length} invitations shown</span><span>Headcount always includes the full guest list.</span></div>}
     </section><p className="admin-explainer">One invitation can include several people. The confirmed headcount adds their attendee numbers. Edited RSVPs replace the previous reply.</p>
     <dialog ref={dialog} className="admin-dialog" aria-labelledby="admin-dialog-title" onCancel={e => { if (busy) e.preventDefault(); else closeDialog(); }} onClick={e => { if (e.target === dialog.current) closeDialog(); }}><div><button className="admin-close" aria-label="Close" disabled={busy} onClick={closeDialog}>×</button>

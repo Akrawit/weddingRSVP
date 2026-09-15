@@ -1,6 +1,6 @@
 import type { Guest } from './guest';
 
-export type AdminGuest = Guest & { id: string; invitation_token: string; rsvp_at: string | null; created_at: string };
+export type AdminGuest = Guest & { id: string; invitation_token: string; invitation_sent: boolean; rsvp_at: string | null; created_at: string };
 export type GuestInput = Pick<Guest, 'display_name' | 'preferred_language' | 'seats_allocated' | 'plus_one_allowed' | 'table_number'>;
 
 export function guestTotals(guests: Guest[]) {

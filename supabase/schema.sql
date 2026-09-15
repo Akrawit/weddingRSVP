@@ -17,6 +17,7 @@ create table public.wedding_guests (
   dietary_requirement text not null default '' check (char_length(dietary_requirement) <= 500),
   table_number text check (char_length(table_number) <= 30),
   invitation_opened_at timestamptz,
+  invitation_sent boolean not null default false,
   rsvp_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

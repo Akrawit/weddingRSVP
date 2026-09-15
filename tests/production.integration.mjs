@@ -10,7 +10,7 @@ import { guestTotals } from '../src/lib/admin.ts';
 
 const project = fileURLToPath(new URL('..', import.meta.url));
 const adminId = randomUUID();
-const defaults = { preferred_language: 'en', seats_confirmed: 0, plus_one_allowed: true, plus_one_name: '', rsvp_status: 'waiting', dietary_requirement: '', table_number: null, rsvp_at: null, created_at: '2026-09-10T00:00:00Z' };
+const defaults = { preferred_language: 'en', seats_confirmed: 0, plus_one_allowed: true, plus_one_name: '', rsvp_status: 'waiting', dietary_requirement: '', table_number: null, invitation_sent: false, rsvp_at: null, created_at: '2026-09-10T00:00:00Z' };
 let guests = [
   { ...defaults, id: randomUUID(), display_name: 'Fixture accepted family', seats_allocated: 2, seats_confirmed: 2, rsvp_status: 'accepted', invitation_token: 'a'.repeat(64) },
   { ...defaults, id: randomUUID(), display_name: 'Fixture waiting family', seats_allocated: 3, invitation_token: 'b'.repeat(64) }
@@ -106,6 +106,11 @@ try {
   assert.equal(new Set(rows.map(g => g.invitation_token)).size, 4);
   assert.ok(rows.every(g => /^[a-f0-9]{64}$/.test(g.invitation_token)));
   const newGuest = rows[2];
+  assert.equal((await request('/api/admin/guests', 'PATCH', { id: newGuest.id, invitation_sent: 'yes' })).status, 400);
+  assert.equal((await request('/api/admin/guests', 'PATCH', { id: newGuest.id, invitation_sent: true })).status, 200);
+  assert.equal((await list()).find(g => g.id === newGuest.id).invitation_sent, true);
+  assert.equal((await request('/api/admin/guests', 'PATCH', { id: newGuest.id, invitation_sent: false })).status, 200);
+  assert.equal((await list()).find(g => g.id === newGuest.id).invitation_sent, false);
   assert.equal((await request('/api/admin/guests', 'PATCH', { ...newGuest, table_number: '8' })).status, 200);
   assert.equal((await list()).find(g => g.id === newGuest.id).table_number, '8');
   assert.equal((await request('/api/admin/guests', 'DELETE', { id: newGuest.id })).status, 200);
