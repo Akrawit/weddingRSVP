@@ -18,6 +18,7 @@ create table public.wedding_guests (
   table_number text check (char_length(table_number) <= 30),
   invitation_opened_at timestamptz,
   invitation_sent boolean not null default false,
+  is_vip boolean not null default false,
   rsvp_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),

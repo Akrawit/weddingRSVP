@@ -1,6 +1,6 @@
 import type { Guest } from './guest';
 
-export type AdminGuest = Guest & { id: string; invitation_token: string; invitation_sent: boolean; rsvp_at: string | null; created_at: string };
+export type AdminGuest = Guest & { id: string; invitation_token: string; invitation_sent: boolean; is_vip: boolean; rsvp_at: string | null; created_at: string };
 export type GuestInput = Pick<Guest, 'display_name' | 'preferred_language' | 'seats_allocated' | 'plus_one_allowed' | 'table_number'>;
 
 export function guestTotals(guests: Guest[]) {
@@ -75,6 +75,6 @@ export function exportGuestCsv(guests: AdminGuest[], origin: string) {
     if (/^[\s]*[=+@\-]/.test(text) || /^[\t\r\n]/.test(text)) text = "'" + text;
     return '"' + text.replaceAll('"', '""') + '"';
   };
-  const rows = [['name', 'seats', 'language', 'table', 'plus_one_allowed', 'rsvp', 'attendees', 'plus_one_name', 'dietary', 'invitation_url'], ...guests.map(g => [g.display_name, g.seats_allocated, g.preferred_language, g.table_number, g.plus_one_allowed, g.rsvp_status, g.seats_confirmed, g.plus_one_name, g.dietary_requirement, `${origin}/i/${g.invitation_token}`])];
+  const rows = [['name', 'seats', 'language', 'table', 'plus_one_allowed', 'vip', 'rsvp', 'attendees', 'plus_one_name', 'dietary', 'invitation_url'], ...guests.map(g => [g.display_name, g.seats_allocated, g.preferred_language, g.table_number, g.plus_one_allowed, g.is_vip, g.rsvp_status, g.seats_confirmed, g.plus_one_name, g.dietary_requirement, `${origin}/i/${g.invitation_token}`])];
   return '\uFEFF' + rows.map(row => row.map(safeCell).join(',')).join('\r\n');
 }

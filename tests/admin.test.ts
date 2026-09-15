@@ -36,7 +36,9 @@ test('CSV size limit measures UTF-8 bytes', () => {
   assert.throws(() => parseGuestCsv(oversized), /250 KB/);
 });
 test('CSV exports invitation URLs and neutralizes spreadsheet formulas', () => {
-  const csv = exportGuestCsv([{ ...demoGuest, id: 'id', invitation_token: 'abc', invitation_sent: false, rsvp_at: null, created_at: '', display_name: '=HYPERLINK("bad")' }], 'https://wedding.example');
+  const csv = exportGuestCsv([{ ...demoGuest, id: 'id', invitation_token: 'abc', invitation_sent: false, is_vip: true, rsvp_at: null, created_at: '', display_name: '=HYPERLINK("bad")' }], 'https://wedding.example');
   assert.ok(csv.includes("\"'=HYPERLINK"));
   assert.ok(csv.includes('https://wedding.example/i/abc'));
+  assert.ok(csv.startsWith('\uFEFF"name","seats","language","table","plus_one_allowed","vip"'));
+  assert.ok(csv.includes('"true"'));
 });
